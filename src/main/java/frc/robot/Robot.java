@@ -3,33 +3,38 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import static frc.robot.Constants.VisionConstants.REEF_CAMERA_NAME;
+import static frc.robot.Constants.VisionConstants.ROBOT_TO_REEF_CAM;
+import static frc.robot.Constants.VisionConstants.ROBOT_TO_STATION_CAM;
+import static frc.robot.Constants.VisionConstants.STATION_CAMERA_NAME;
+
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
 // WPILib Imports
-import edu.wpi.first.wpilibj.TimedRobot;
+import frc.robot.systems.DriveFSMSystem;
+import frc.robot.systems.Vision;
+import frc.robot.systems.VisionIOPhotonPoseEstimator;
+import frc.robot.systems.VisionIOPhotonPoseEstimatorSim;
 
 // Systems
-import frc.robot.systems.ExampleFSMSystem;
-import frc.robot.systems.FSMSystem;
-import frc.robot.systems.PlaceholderFSMSystem;
-import frc.robot.motors.MotorManager;
-import frc.robot.systems.AutoHandlerSystem;
-import frc.robot.systems.AutoHandlerSystem.AutoPath;
-
 /**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to
  * each mode, as described in the TimedRobot documentation.
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
 	private TeleopInput input;
 
 	// Systems
-	private FSMSystem<?> subSystem1;
-	private ExampleFSMSystem subSystem2;
-	private ExampleFSMSystem subSystem3;
-
-	private AutoHandlerSystem autoHandler;
+	private DriveFSMSystem drivetrain;
+	private Vision vision;
 
 	/**
-	 * This function is run when the robot is first started up and should be used for any
+	 * This function is run when the robot is first started up and should be used
+	 * for any
 	 * initialization code.
 	 */
 	@Override
@@ -37,52 +42,53 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 		input = new TeleopInput();
 
-		// Instantiate all systems here
-		subSystem2 = new ExampleFSMSystem();
-		subSystem3 = new ExampleFSMSystem();
+		Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
 
-		// you can swap out FSM systems if neccesary
-		// this may be needed if you want different behavior in sim
-		// do not instantiate something that would try to use hardware you don't have
-		if (HardwareMap.isExampleFSMEnabled()) {
-			subSystem1 = new ExampleFSMSystem();
-		} else {
-			subSystem1 = new PlaceholderFSMSystem();
+		if (isReal()) {
+			Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+			Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+		} else if (isSimulation()) {
+			Logger.addDataReceiver(new NT4Publisher());
 		}
 
-		autoHandler = new AutoHandlerSystem((ExampleFSMSystem) subSystem1, subSystem2, subSystem3);
+		Logger.start(); // Start
+
+		// Instantiate all systems here
+		drivetrain = new DriveFSMSystem();
+
+		if (isReal()) {
+			vision = new Vision(
+					drivetrain::addVisionMeasurement,
+					new VisionIOPhotonPoseEstimator(REEF_CAMERA_NAME, ROBOT_TO_REEF_CAM),
+					new VisionIOPhotonPoseEstimator(STATION_CAMERA_NAME, ROBOT_TO_STATION_CAM));
+		} else if (isSimulation()) {
+			vision = new Vision(
+					drivetrain::addVisionMeasurement,
+					new VisionIOPhotonPoseEstimatorSim(
+							REEF_CAMERA_NAME, ROBOT_TO_REEF_CAM, drivetrain::getPose),
+					new VisionIOPhotonPoseEstimatorSim(
+							STATION_CAMERA_NAME, ROBOT_TO_STATION_CAM, drivetrain::getPose));
+		}
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		autoHandler.reset(AutoPath.PATH1);
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		autoHandler.update();
-
-		// logs motor values
-		MotorManager.update();
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		subSystem1.reset();
-		subSystem2.reset();
-		subSystem3.reset();
+		drivetrain.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		subSystem1.update(input);
-		subSystem2.update(input);
-		subSystem3.update(input);
-
-		// logs motor values
-		MotorManager.update();
+		drivetrain.update(input);
 	}
 
 	@Override
@@ -105,7 +111,7 @@ public class Robot extends TimedRobot {
 
 	}
 
-	/* Simulation mode handlers, only used for simulation testing  */
+	/* Simulation mode handlers, only used for simulation testing */
 	@Override
 	public void simulationInit() {
 		System.out.println("-------- Simulation Init --------");
@@ -118,5 +124,7 @@ public class Robot extends TimedRobot {
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
-	public void robotPeriodic() { }
+	public void robotPeriodic() {
+		vision.periodic();
+	}
 }
