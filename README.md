@@ -25,6 +25,8 @@ First you need code to actually execute
     - Click the bright green button labled code, copy the link you see
     - Once you have copied the link, go to your terminal and navigate to your Projects folder, if you dont have one make one once you are in projects folder, type "git clone" followed by the link
     - This will create a folder in your Projects folder called WPILibSimActivity this is the code you're executing
+    - If you are trying to simulate a different repository, its the same steps just go to THAT repository link.
+    - *Note: Sim has to be set up on a repo in code before running*
 3. How to run Simulation
     - Open WPILib and then open the WPILibSimActivity repository in WPI
     - Now click the WPI logo in the top right and type Simulate Robot code
