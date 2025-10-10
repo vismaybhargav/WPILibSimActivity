@@ -30,3 +30,11 @@ First you need code to actually execute
 3. How to run Simulation
     - Open WPILib and then open the WPILibSimActivity repository in WPI
     - Now click the WPI logo in the top right and type Simulate Robot code
+    - A prompt will come up at the top of your screen, select Sim Gui and click Ok
+    - Once Simulation opens, go back to WPILib and click the logo again
+    - Select Start tool and choose advantage scope.
+    - Once you do that, in the top right click File -> Connect to Simulator
+    - Then a bunch of tabs should come up on the left side
+    - On the top right click + and choose 3D Field then go to that tab
+    - On the left side go to AdvantageKit-> Swerve and then drag DriveTrain Pose to the bottom of the Page labeled Poses
+    - Now go back to The simulation window, at the top of you screen go to DS, make sure 
