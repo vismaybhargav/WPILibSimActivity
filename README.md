@@ -37,4 +37,14 @@ First you need code to actually execute
     - Then a bunch of tabs should come up on the left side
     - On the top right click + and choose 3D Field then go to that tab
     - On the left side go to AdvantageKit-> Swerve and then drag DriveTrain Pose to the bottom of the Page labeled Poses
-    - Now go back to The simulation window, at the top of you screen go to DS, make sure 
+    - Now go back to The simulation window, at the top of you screen go to DS, make sure Joysticks and System Joysticks are both checked
+    - If you have a PS4 controller
+        - Plug it in and on the simulation window drag it from System Joysticks to Joystick[0] in the Joysticks tab
+    - If you have any other controller, Currently have not made it so you can use any controller without manual change of code
+        -**Will be changed soon**
+    -If you don't have a controller and only a keyboard **(Best to have a controller if you can)**
+        -Drag Keyboard 6 from System Joysticks to Joystick[0] on the Joysticks Tab
+        -This only applies to keyboard but your computer needs to be focused on the simulation window
+            -You should focus on the window then make it small so you can see advantage scope while still being focused on the Robot Simulation.
+            -WASD, foward, back,left, right
+            -ER,  Counterclockwise Rotation, Clockwise Rotation
